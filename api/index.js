@@ -910,6 +910,70 @@ app.delete('/api/v1/expenses/:id', authenticateUser, async (req, res) => {
   }
 })
 
+// GET /api/v1/expenses/summary - Get expense summary and analytics
+app.get('/api/v1/expenses/summary', authenticateUser, async (req, res) => {
+  try {
+    const { category, dateFrom, dateTo } = req.query
+    let query = supabase
+      .from('expenses')
+      .select('amount, category, date')
+      .eq('user_id', req.user.id)
+
+    // Apply filters
+    if (category) {
+      query = query.eq('category', category)
+    }
+    
+    if (dateFrom) {
+      query = query.gte('date', dateFrom)
+    }
+    
+    if (dateTo) {
+      query = query.lte('date', dateTo)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error('Database error:', error)
+      return res.status(500).json({
+        error: 'Internal Server Error',
+        message: 'Failed to fetch expense summary'
+      })
+    }
+
+    // Calculate summary
+    const total = data.reduce((sum, expense) => sum + expense.amount, 0)
+    const count = data.length
+
+    // Calculate category breakdown
+    const categories = data.reduce((acc, expense) => {
+      const category = expense.category
+      if (!acc[category]) {
+        acc[category] = { amount: 0, count: 0 }
+      }
+      acc[category].amount += expense.amount
+      acc[category].count += 1
+      return acc
+    }, {})
+
+    res.json({
+      success: true,
+      data: {
+        total,
+        count,
+        categories
+      }
+    })
+  } catch (error) {
+    console.error('Get expense summary error:', error)
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'Failed to fetch expense summary'
+    })
+  }
+})
+
 // ================================================
 // ERROR HANDLING
 // ================================================
@@ -924,7 +988,7 @@ app.use('*', (req, res) => {
       docs: 'GET /api-docs',
       info: 'GET /api/v1/info',
       auth: 'POST /auth/login, POST /auth/logout',
-      expenses: 'GET|POST /api/v1/expenses, GET|PUT|DELETE /api/v1/expenses/:id'
+      expenses: 'GET|POST /api/v1/expenses, GET|PUT|DELETE /api/v1/expenses/:id, GET /api/v1/expenses/summary'
     }
   })
 })

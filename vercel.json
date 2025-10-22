@@ -1,7 +1,15 @@
 {
   "version": 2,
-  "name": "expense-tracker-api",
+  "name": "expense-tracker-fullstack",
+  "buildCommand": "npm run build",
   "builds": [
+    {
+      "src": "client/package.json",
+      "use": "@vercel/next",
+      "config": {
+        "distDir": ".next"
+      }
+    },
     {
       "src": "api/index.js",
       "use": "@vercel/node",
@@ -12,8 +20,12 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "api/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "client/$1"
     }
   ],
   "functions": {

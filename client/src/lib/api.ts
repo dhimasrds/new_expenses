@@ -1,6 +1,6 @@
 import { Expense, ExpenseFormData, ExpenseFilters, ExpenseSummary, ApiResponse, PaginatedResponse } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 class ExpenseAPI {
   private async request<T>(
@@ -40,46 +40,46 @@ class ExpenseAPI {
     params.append('page', page.toString());
     params.append('limit', limit.toString());
 
-    const response = await this.request(`/api/v1/expenses/demo?${params}`);
+    const response = await this.request<{ expenses: Expense[], total: number }>(`/api/expenses?${params}`);
     
-    // Transform demo response to expected format
-    const data = response as any;
+    const data = response.data!;
     const expenses = data.expenses || [];
+    const total = data.total || 0;
     
     return {
       data: expenses,
       pagination: {
         page: page,
         limit: limit,
-        total: expenses.length,
-        totalPages: Math.ceil(expenses.length / limit)
+        total: total,
+        totalPages: Math.ceil(total / limit)
       }
     };
   }
 
-  async getExpense(id: number): Promise<Expense> {
-    const response = await this.request<Expense>(`/api/v1/expenses/${id}`);
+  async getExpense(id: string): Promise<Expense> {
+    const response = await this.request<Expense>(`/api/expenses/${id}`);
     return response.data!;
   }
 
   async createExpense(expense: ExpenseFormData): Promise<Expense> {
-    const response = await this.request<Expense>('/api/v1/expenses', {
+    const response = await this.request<Expense>('/api/expenses', {
       method: 'POST',
       body: JSON.stringify(expense),
     });
     return response.data!;
   }
 
-  async updateExpense(id: number, expense: Partial<ExpenseFormData>): Promise<Expense> {
-    const response = await this.request<Expense>(`/api/v1/expenses/${id}`, {
+  async updateExpense(id: string, expense: Partial<ExpenseFormData>): Promise<Expense> {
+    const response = await this.request<Expense>(`/api/expenses/${id}`, {
       method: 'PUT',
       body: JSON.stringify(expense),
     });
     return response.data!;
   }
 
-  async deleteExpense(id: number): Promise<void> {
-    await this.request(`/api/v1/expenses/${id}`, {
+  async deleteExpense(id: string): Promise<void> {
+    await this.request(`/api/expenses/${id}`, {
       method: 'DELETE',
     });
   }
@@ -91,29 +91,9 @@ class ExpenseAPI {
     if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom);
     if (filters?.dateTo) params.append('dateTo', filters.dateTo);
 
-    const response = await this.request(`/api/v1/expenses/demo?${params}`);
+    const response = await this.request<ExpenseSummary>(`/api/expenses/summary?${params}`);
     
-    // Extract summary data from demo response
-    const data = response as any;
-    const expenses = data.expenses || [];
-    
-    if (Array.isArray(expenses)) {
-      const total = expenses.reduce((sum: number, expense: any) => sum + expense.amount, 0);
-      const count = expenses.length;
-      const categories = expenses.reduce((acc: any, expense: any) => {
-        const category = expense.category;
-        if (!acc[category]) {
-          acc[category] = { amount: 0, count: 0 };
-        }
-        acc[category].amount += expense.amount;
-        acc[category].count += 1;
-        return acc;
-      }, {});
-      
-      return { total, count, categories };
-    }
-    
-    return { total: 0, count: 0, categories: {} };
+    return response.data!;
   }
 }
 

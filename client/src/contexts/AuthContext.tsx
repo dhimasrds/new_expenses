@@ -1,113 +1,108 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 interface User {
   id: string;
-  name: string;
   email: string;
+  name: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
-  signup: (name: string, email: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in on mount
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      // TODO: Check with backend API if user is authenticated
-      // For now, check localStorage for demo purposes
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-    } finally {
-      setIsLoading(false);
+    // Check for stored user
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('access_token');
+    if (storedUser && storedToken) {
+      setUser(JSON.parse(storedUser));
     }
-  };
+    setIsLoading(false);
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      // TODO: Implement actual API call to backend
-      console.log('Login attempt:', { email, password });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, create a mock user
-      const mockUser: User = {
-        id: '1',
-        name: 'Demo User',
-        email: email
-      };
-      
-      // Store user in localStorage (in real app, you'd handle JWT tokens)
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Login failed');
+      }
+
+      // Store token and user data
+      localStorage.setItem('access_token', data.data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      setUser(data.data.user);
     } catch (error) {
       console.error('Login error:', error);
-      throw new Error('Login failed');
+      throw error;
     }
   };
 
-  const signup = async (name: string, email: string, password: string) => {
+  const signup = async (email: string, password: string, name: string) => {
     try {
-      // TODO: Implement actual API call to backend
-      console.log('Signup attempt:', { name, email, password });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, just log success
-      // In real app, you might auto-login or require email verification
+      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, name }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Signup failed');
+      }
+
+      // Store token and user data
+      localStorage.setItem('access_token', data.data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      setUser(data.data.user);
     } catch (error) {
       console.error('Signup error:', error);
-      throw new Error('Signup failed');
+      throw error;
     }
   };
 
   const logout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('access_token');
     setUser(null);
   };
 
-  const value: AuthContextType = {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    login,
-    logout,
-    signup
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};

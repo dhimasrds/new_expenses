@@ -3,17 +3,34 @@ import { Expense, ExpenseFormData, ExpenseFilters, ExpenseSummary, ApiResponse, 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 class ExpenseAPI {
+  private getAuthToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('access_token');
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
+      const token = this.getAuthToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add Authorization header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // Merge with any additional headers from options
+      if (options.headers) {
+        Object.assign(headers, options.headers);
+      }
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
         ...options,
+        headers,
       });
 
       const data = await response.json();

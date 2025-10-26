@@ -177,19 +177,18 @@ const specs = swaggerJSDoc(options);
  * @param {import('express').Application} app - Express application
  */
 export function setupSwagger(app) {
-  // Swagger UI
-  app.use('/api-docs', swaggerUi.serve);
-  app.get('/api-docs', swaggerUi.setup(specs, {
-    explorer: true,
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'Expense Tracker API Documentation'
-  }));
-
   // JSON schema endpoint
   app.get('/api-docs.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(specs);
   });
+
+  // Swagger UI - must be setup after the JSON endpoint
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Expense Tracker API Documentation'
+  }));
 
   console.log('📚 Swagger documentation setup complete');
   console.log('📖 API Docs available at: /api-docs');

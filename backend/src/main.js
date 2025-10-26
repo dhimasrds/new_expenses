@@ -49,8 +49,24 @@ class Application {
    */
   setupMiddleware() {
     // CORS configuration
+    const allowedOrigins = process.env.ALLOWED_ORIGINS 
+      ? process.env.ALLOWED_ORIGINS.split(',')
+      : ['http://localhost:3000', 'http://localhost:3001'];
+
     this.app.use(cors({
-      origin: process.env.CLIENT_URL || 'http://localhost:3000',
+      origin: function(origin, callback) {
+        // Allow requests with no origin (mobile apps, Postman, curl, etc)
+        if (!origin) return callback(null, true);
+        
+        // Allow Vercel preview deployments
+        if (origin.includes('.vercel.app')) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) === -1) {
+          const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+          return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization']
@@ -171,14 +187,26 @@ class Application {
   }
 }
 
-// Handle graceful shutdown
-const app = new Application()
+// Initialize application instance
+const appInstance = new Application()
 
-process.on('SIGTERM', () => app.stop())
-process.on('SIGINT', () => app.stop())
+// For Vercel serverless deployment - initialize and export
+if (process.env.VERCEL) {
+  await appInstance.initialize()
+}
 
-// Start the application
-app.start().catch(error => {
-  console.error('Failed to start application:', error)
-  process.exit(1)
-})
+// For local development
+if (!process.env.VERCEL) {
+  // Handle graceful shutdown
+  process.on('SIGTERM', () => appInstance.stop())
+  process.on('SIGINT', () => appInstance.stop())
+
+  // Start the application
+  appInstance.start().catch(error => {
+    console.error('Failed to start application:', error)
+    process.exit(1)
+  })
+}
+
+// Export for Vercel serverless
+export default appInstance.app

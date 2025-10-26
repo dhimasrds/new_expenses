@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "expense-tracker-fullstack",
-  "buildCommand": "npm run build",
+  "buildCommand": "cd client && npm install && npm run build",
   "builds": [
     {
       "src": "client/package.json",
@@ -11,7 +11,7 @@
       }
     },
     {
-      "src": "api/index.js",
+      "src": "backend/src/main.js",
       "use": "@vercel/node",
       "config": {
         "maxLambdaSize": "50mb"
@@ -20,8 +20,20 @@
   ],
   "routes": [
     {
+      "src": "/api/health",
+      "dest": "backend/src/main.js"
+    },
+    {
+      "src": "/health",
+      "dest": "backend/src/main.js"
+    },
+    {
+      "src": "/api-docs(.*)",
+      "dest": "backend/src/main.js"
+    },
+    {
       "src": "/api/(.*)",
-      "dest": "api/index.js"
+      "dest": "backend/src/main.js"
     },
     {
       "src": "/(.*)",
@@ -29,7 +41,7 @@
     }
   ],
   "functions": {
-    "api/index.js": {
+    "backend/src/main.js": {
       "maxDuration": 30
     }
   },

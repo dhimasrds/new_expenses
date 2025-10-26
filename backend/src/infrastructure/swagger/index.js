@@ -15,12 +15,14 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3001',
-        description: 'Development server'
+        url: process.env.VERCEL_URL 
+          ? `https://${process.env.VERCEL_URL}` 
+          : process.env.API_URL || 'http://localhost:3001',
+        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server'
       },
       {
-        url: 'https://your-production-url.com',
-        description: 'Production server'
+        url: 'http://localhost:3001',
+        description: 'Local development server'
       }
     ],
     components: {

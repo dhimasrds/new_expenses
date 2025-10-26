@@ -50,22 +50,34 @@ export class GetExpensesUseCase {
     this.expenseRepository = expenseRepository
   }
 
-  async execute(filterDTO, paginationDTO) {
+  async execute(userId, query) {
+    const page = parseInt(query.page) || 1
+    const limit = parseInt(query.limit) || 10
+    const offset = (page - 1) * limit
+
     const { expenses, total } = await this.expenseRepository.findByUserId(
-      filterDTO.userId,
+      userId,
       {
-        category: filterDTO.category,
-        dateFrom: filterDTO.dateFrom,
-        dateTo: filterDTO.dateTo,
-        search: filterDTO.search
+        category: query.category,
+        dateFrom: query.dateFrom,
+        dateTo: query.dateTo,
+        search: query.search
       },
       {
-        limit: paginationDTO.limit,
-        offset: paginationDTO.offset
+        limit,
+        offset
       }
     )
 
-    return new ExpenseListResponseDTO(expenses, total, paginationDTO)
+    return {
+      data: ExpenseResponseDTO.fromExpenses(expenses),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    }
   }
 }
 

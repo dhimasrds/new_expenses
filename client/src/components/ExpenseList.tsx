@@ -62,10 +62,10 @@ export function ExpenseList({ expenses, loading = false, onRefresh }: ExpenseLis
 
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-slate-800/50 backdrop-blur-lg border border-slate-700/50">
         <CardContent className="p-6">
           <div className="flex items-center justify-center h-32">
-            <div className="text-sm text-muted-foreground">Loading expenses...</div>
+            <div className="text-sm text-gray-400">Loading expenses...</div>
           </div>
         </CardContent>
       </Card>
@@ -74,10 +74,10 @@ export function ExpenseList({ expenses, loading = false, onRefresh }: ExpenseLis
 
   if (expenses.length === 0) {
     return (
-      <Card>
+      <Card className="bg-slate-800/50 backdrop-blur-lg border border-slate-700/50">
         <CardContent className="p-6">
           <div className="flex items-center justify-center h-32">
-            <div className="text-sm text-muted-foreground">No expenses found</div>
+            <div className="text-sm text-gray-400">No expenses found</div>
           </div>
         </CardContent>
       </Card>
@@ -86,31 +86,31 @@ export function ExpenseList({ expenses, loading = false, onRefresh }: ExpenseLis
 
   return (
     <>
-      <Card>
+      <Card className="bg-slate-800/50 backdrop-blur-lg border border-slate-700/50">
         <CardHeader>
-          <CardTitle>Recent Expenses</CardTitle>
-          <CardDescription>Your recent expense transactions</CardDescription>
+          <CardTitle className="text-white">Recent Expenses</CardTitle>
+          <CardDescription className="text-gray-400">Your recent expense transactions</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+              <TableRow className="border-slate-700 hover:bg-slate-700/50">
+                <TableHead className="text-gray-300">Date</TableHead>
+                <TableHead className="text-gray-300">Description</TableHead>
+                <TableHead className="text-gray-300">Category</TableHead>
+                <TableHead className="text-right text-gray-300">Amount</TableHead>
+                <TableHead className="text-right text-gray-300">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {expenses.map((expense) => (
-                <TableRow key={expense.id}>
-                  <TableCell>{formatDate(expense.date)}</TableCell>
-                  <TableCell className="font-medium">{expense.description}</TableCell>
+                <TableRow key={expense.id} className="border-slate-700 hover:bg-slate-700/30">
+                  <TableCell className="text-gray-300">{formatDate(expense.date)}</TableCell>
+                  <TableCell className="font-medium text-white">{expense.description}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{expense.category}</Badge>
+                    <Badge variant="secondary" className="bg-slate-700 text-gray-300 border-slate-600">{expense.category}</Badge>
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell className="text-right font-mono text-white">
                     {formatCurrency(expense.amount)}
                   </TableCell>
                   <TableCell className="text-right">
@@ -119,6 +119,7 @@ export function ExpenseList({ expenses, loading = false, onRefresh }: ExpenseLis
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(expense)}
+                        className="border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white"
                       >
                         Edit
                       </Button>
@@ -127,6 +128,7 @@ export function ExpenseList({ expenses, loading = false, onRefresh }: ExpenseLis
                         size="sm"
                         onClick={() => handleDelete(expense.id)}
                         disabled={deleteLoading === expense.id}
+                        className="bg-red-600 hover:bg-red-700 text-white border-0"
                       >
                         {deleteLoading === expense.id ? 'Deleting...' : 'Delete'}
                       </Button>
@@ -141,9 +143,9 @@ export function ExpenseList({ expenses, loading = false, onRefresh }: ExpenseLis
 
       {/* Edit Dialog */}
       <Dialog open={!!editingExpense} onOpenChange={() => setEditingExpense(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-slate-800 border-slate-700">
           <DialogHeader>
-            <DialogTitle>Edit Expense</DialogTitle>
+            <DialogTitle className="text-white">Edit Expense</DialogTitle>
           </DialogHeader>
           {editingExpense && (
             <ExpenseForm

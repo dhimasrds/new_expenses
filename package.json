@@ -2,7 +2,7 @@
   "name": "expense-tracker-monorepo",
   "version": "1.0.0",
   "description": "Full-stack expense tracker dengan Next.js frontend dan Supabase backend",
-  "main": "api/index.js",
+  "main": "backend/src/main.js",
   "type": "module",
   "private": true,
   "workspaces": [
@@ -10,11 +10,13 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:client\"",
-    "dev:api": "PORT=3001 nodemon api/index.js",
+    "dev:api": "PORT=3001 nodemon backend/src/main.js",
+    "dev:api:old": "PORT=3001 nodemon api/index.js",
     "dev:client": "cd client && npm run dev",
     "build": "npm run build:client",
     "build:client": "cd client && npm run build",
-    "start": "node api/index.js",
+    "start": "node backend/src/main.js",
+    "start:old": "node api/index.js",
     "start:client": "cd client && npm start",
     "test": "jest",
     "deploy": "vercel --prod",
@@ -28,7 +30,9 @@
     "express": "^4.18.2",
     "express-rate-limit": "^6.8.1",
     "helmet": "^7.0.0",
-    "swagger-ui-express": "^5.0.0",
+    "joi": "^18.0.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {

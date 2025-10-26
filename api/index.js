@@ -193,10 +193,24 @@ try {
   console.warn('Could not load swagger documentation:', error.message)
 }
 
+// API Documentation routes
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
   customSiteTitle: 'Expense Tracker API Documentation',
   customCss: '.swagger-ui .topbar { display: none }'
 }))
+
+// Alternative documentation route
+app.use('/docs', swaggerUi.serve)
+app.get('/docs', swaggerUi.setup(swaggerDocument, {
+  customSiteTitle: 'Expense Tracker API Documentation',
+  customCss: '.swagger-ui .topbar { display: none }'
+}))
+
+// JSON schema endpoint
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerDocument);
+})
 
 // ================================================
 // DATABASE CHECK MIDDLEWARE

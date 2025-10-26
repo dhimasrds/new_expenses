@@ -97,10 +97,10 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
+      <Card className="bg-slate-800/50 backdrop-blur-lg border border-slate-700/50 shadow-2xl">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-white">Login to your account</CardTitle>
+          <CardDescription className="text-gray-400">
             Enter your email below to login to your account
           </CardDescription>
         </CardHeader>
@@ -108,18 +108,21 @@ export function LoginForm({
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email" className="text-gray-200">Email</FieldLabel>
                 <Input
                   id="email"
                   type="email"
                   placeholder="m@example.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={errors.email ? 'border-red-500' : ''}
+                  className={cn(
+                    "bg-slate-700/50 border-slate-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500",
+                    errors.email ? 'border-red-500' : ''
+                  )}
                   required
                 />
                 {errors.email && (
-                  <FieldDescription className="text-red-500">
+                  <FieldDescription className="text-red-400">
                     {errors.email}
                   </FieldDescription>
                 )}
@@ -127,11 +130,11 @@ export function LoginForm({
 
               <Field>
                 <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <FieldLabel htmlFor="password" className="text-gray-200">Password</FieldLabel>
                   <button
                     type="button"
                     onClick={onForgotPasswordClick}
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto inline-block text-sm text-blue-400 hover:text-blue-300 underline-offset-4 hover:underline"
                   >
                     Forgot your password?
                   </button>
@@ -141,18 +144,25 @@ export function LoginForm({
                   type="password"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={errors.password ? 'border-red-500' : ''}
+                  className={cn(
+                    "bg-slate-700/50 border-slate-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500",
+                    errors.password ? 'border-red-500' : ''
+                  )}
                   required
                 />
                 {errors.password && (
-                  <FieldDescription className="text-red-500">
+                  <FieldDescription className="text-red-400">
                     {errors.password}
                   </FieldDescription>
                 )}
               </Field>
 
               <Field>
-                <Button type="submit" disabled={isLoading} className="w-full">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading} 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg"
+                >
                   {isLoading ? 'Logging in...' : 'Login'}
                 </Button>
                 
@@ -160,17 +170,17 @@ export function LoginForm({
                   variant="outline"
                   type="button"
                   onClick={handleGoogleLogin}
-                  className="w-full"
+                  className="w-full border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white"
                 >
                   Login with Google
                 </Button>
                 
-                <FieldDescription className="text-center">
+                <FieldDescription className="text-center text-gray-400">
                   Don&apos;t have an account?{' '}
                   <button
                     type="button"
                     onClick={onSignUpClick}
-                    className="underline-offset-4 hover:underline"
+                    className="text-blue-400 hover:text-blue-300 underline-offset-4 hover:underline"
                   >
                     Sign up
                   </button>

@@ -24,6 +24,8 @@ export interface ExpenseFilters {
 
 export interface ExpenseSummary {
   total: number;
+  totalExpenses?: number;
+  totalTransactions?: number;
   count: number;
   categories: {
     [key: string]: {

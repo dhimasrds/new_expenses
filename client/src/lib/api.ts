@@ -1,6 +1,9 @@
 import { Expense, ExpenseFormData, ExpenseFilters, ExpenseSummary, ApiResponse, PaginatedResponse } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Use relative URL in production, localhost in development
+const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? '' // Empty string for relative URLs in production
+  : 'http://localhost:3001';
 
 class ExpenseAPI {
   private getAuthToken(): string | null {

@@ -1,0 +1,412 @@
+{
+	"info": {
+		"_postman_id": "expense-tracker-api-2025",
+		"name": "Expense Tracker API",
+		"description": "Complete API collection for Expense Tracker application with authentication and CRUD operations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.access_token) {",
+									"        pm.environment.set(\"access_token\", jsonData.data.access_token);",
+									"        pm.environment.set(\"user_id\", jsonData.data.user.id);",
+									"        console.log(\"Token saved:\", jsonData.data.access_token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"lele@gmail.com\",\n  \"password\": \"test1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with email and password. Returns JWT access token."
+					},
+					"response": []
+				},
+				{
+					"name": "Signup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.access_token) {",
+									"        pm.environment.set(\"access_token\", jsonData.data.access_token);",
+									"        pm.environment.set(\"user_id\", jsonData.data.user.id);",
+									"        console.log(\"Token saved:\", jsonData.data.access_token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"New User\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Register a new user account. Returns JWT access token."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Expenses",
+			"item": [
+				{
+					"name": "Get All Expenses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/expenses?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"expenses"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page"
+								},
+								{
+									"key": "category",
+									"value": "Shopping",
+									"description": "Filter by category",
+									"disabled": true
+								},
+								{
+									"key": "dateFrom",
+									"value": "2024-01-01",
+									"description": "Filter from date (YYYY-MM-DD)",
+									"disabled": true
+								},
+								{
+									"key": "dateTo",
+									"value": "2024-12-31",
+									"description": "Filter to date (YYYY-MM-DD)",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "grocery",
+									"description": "Search in description",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get paginated list of expenses with optional filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Expense by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/expenses/{{expense_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"expenses",
+								"{{expense_id}}"
+							]
+						},
+						"description": "Get single expense by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Expense",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.environment.set(\"expense_id\", jsonData.data.id);",
+									"        console.log(\"Expense ID saved:\", jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Grocery Shopping\",\n  \"amount\": 89.50,\n  \"category\": \"Shopping\",\n  \"date\": \"2024-10-26\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/expenses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"expenses"
+							]
+						},
+						"description": "Create a new expense"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Expense",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Updated Grocery Shopping\",\n  \"amount\": 95.00,\n  \"category\": \"Shopping\",\n  \"date\": \"2024-10-26\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/expenses/{{expense_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"expenses",
+								"{{expense_id}}"
+							]
+						},
+						"description": "Update an existing expense"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Expense",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/expenses/{{expense_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"expenses",
+								"{{expense_id}}"
+							]
+						},
+						"description": "Delete an expense by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Expense Summary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/expenses/summary",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"expenses",
+								"summary"
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "Shopping",
+									"description": "Filter by category",
+									"disabled": true
+								},
+								{
+									"key": "dateFrom",
+									"value": "2024-01-01",
+									"description": "Filter from date (YYYY-MM-DD)",
+									"disabled": true
+								},
+								{
+									"key": "dateTo",
+									"value": "2024-12-31",
+									"description": "Filter to date (YYYY-MM-DD)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get expense summary with total, count, and category breakdown"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Check if API is running"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://newexpenses.vercel.app",
+			"type": "string"
+		}
+	]
+}

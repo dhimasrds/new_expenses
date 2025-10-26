@@ -147,7 +147,7 @@ export class ExpenseController {
   async getExpenses(req, res) {
     try {
       const result = await this.getExpensesUseCase.execute(req.user.id, req.query)
-      res.json(ApiResponse.success(result.expenses, { pagination: result.pagination }))
+      res.json(ApiResponse.success(result.data, { pagination: result.pagination }))
     } catch (error) {
       console.error('Get expenses error:', error)
       res.status(500).json(

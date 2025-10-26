@@ -20,7 +20,7 @@ interface ExpenseListProps {
 
 export function ExpenseList({ expenses, loading = false, onRefresh }: ExpenseListProps) {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [updateLoading, setUpdateLoading] = useState(false);
 
   const handleEdit = (expense: Expense) => {
@@ -44,7 +44,7 @@ export function ExpenseList({ expenses, loading = false, onRefresh }: ExpenseLis
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this expense?')) return;
 
     try {

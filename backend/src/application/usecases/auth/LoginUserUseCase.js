@@ -12,32 +12,26 @@ export class LoginUserUseCase {
    * Execute user login
    */
   async execute(loginData) {
-    try {
-      if (!loginData) {
-        throw new Error('Login data is required')
-      }
+    if (!loginData) {
+      throw new Error('Login data is required')
+    }
 
-      const { email, password } = loginData
+    const { email, password } = loginData
 
-      if (!email || !password) {
-        throw new Error('Email and password are required')
-      }
+    if (!email || !password) {
+      throw new Error('Email and password are required')
+    }
 
-      // Authenticate through auth service
-      const authResult = await this.authService.login(email, password)
+    // Authenticate through auth service
+    const authResult = await this.authService.login(email, password)
 
-      // Return user data directly from Supabase auth result
-      return {
-        success: true,
-        data: {
-          user: authResult.user,
-          access_token: authResult.access_token,
-          session: authResult.session
-        },
-        message: 'Login successful'
-      }
-    } catch (error) {
-      throw new Error(`Login failed: ${error.message}`)
+    // Return simplified auth data
+    return {
+      user: {
+        id: authResult.user.id,
+        email: authResult.user.email
+      },
+      accessToken: authResult.access_token
     }
   }
 }

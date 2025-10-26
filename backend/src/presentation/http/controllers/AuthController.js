@@ -1,3 +1,5 @@
+import { ApiResponse, ErrorCodes } from '../helpers/ApiResponse.js'
+
 /**
  * HTTP Controller for Authentication operations
  */
@@ -21,28 +23,25 @@ export class AuthController {
   async login(req, res) {
     try {
       const result = await this.loginUseCase.execute(req.body)
-      res.json(result)
+      res.json(ApiResponse.success(result))
     } catch (error) {
       console.error('Login error:', error)
       
       if (error.message.includes('Validation failed')) {
-        return res.status(400).json({
-          error: 'Bad Request',
-          message: error.message
-        })
+        return res.status(400).json(
+          ApiResponse.error(ErrorCodes.VALIDATION_ERROR, error.message)
+        )
       }
 
       if (error.message.includes('Authentication failed') || error.message.includes('Login failed')) {
-        return res.status(401).json({
-          error: 'Unauthorized',
-          message: 'Invalid email or password'
-        })
+        return res.status(401).json(
+          ApiResponse.error(ErrorCodes.INVALID_CREDENTIALS, 'Invalid email or password')
+        )
       }
 
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Login failed'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Login failed')
+      )
     }
   }
 
@@ -53,28 +52,25 @@ export class AuthController {
   async signup(req, res) {
     try {
       const result = await this.signupUseCase.execute(req.body)
-      res.status(201).json(result)
+      res.status(201).json(ApiResponse.success(result))
     } catch (error) {
       console.error('Signup error:', error)
       
       if (error.message.includes('Validation failed')) {
-        return res.status(400).json({
-          error: 'Bad Request',
-          message: error.message
-        })
+        return res.status(400).json(
+          ApiResponse.error(ErrorCodes.VALIDATION_ERROR, error.message)
+        )
       }
 
       if (error.message.includes('already exists')) {
-        return res.status(409).json({
-          error: 'Conflict',
-          message: 'User already exists with this email'
-        })
+        return res.status(409).json(
+          ApiResponse.error(ErrorCodes.ALREADY_EXISTS, 'User already exists with this email')
+        )
       }
 
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Signup failed'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Signup failed')
+      )
     }
   }
 
@@ -87,21 +83,19 @@ export class AuthController {
       const authHeader = req.headers.authorization
       
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({
-          error: 'Unauthorized',
-          message: 'No valid token provided'
-        })
+        return res.status(401).json(
+          ApiResponse.error(ErrorCodes.UNAUTHORIZED, 'No valid token provided')
+        )
       }
 
       const token = authHeader.substring(7)
       const result = await this.verifyTokenUseCase.execute(token)
-      res.json(result)
+      res.json(ApiResponse.success(result))
     } catch (error) {
       console.error('Verify token error:', error)
-      res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Invalid or expired token'
-      })
+      res.status(401).json(
+        ApiResponse.error(ErrorCodes.TOKEN_EXPIRED, 'Invalid or expired token')
+      )
     }
   }
 
@@ -111,16 +105,12 @@ export class AuthController {
    */
   async logout(req, res) {
     try {
-      res.json({
-        success: true,
-        message: 'Logout successful'
-      })
+      res.json(ApiResponse.success({ message: 'Logout successful' }))
     } catch (error) {
       console.error('Logout error:', error)
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Logout failed'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Logout failed')
+      )
     }
   }
 
@@ -131,21 +121,19 @@ export class AuthController {
   async getProfile(req, res) {
     try {
       const result = await this.getUserProfileUseCase.execute(req.user.id)
-      res.json(result)
+      res.json(ApiResponse.success(result))
     } catch (error) {
       console.error('Get profile error:', error)
       
       if (error.message.includes('not found')) {
-        return res.status(404).json({
-          error: 'Not Found',
-          message: 'User not found'
-        })
+        return res.status(404).json(
+          ApiResponse.error(ErrorCodes.NOT_FOUND, 'User not found')
+        )
       }
 
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Failed to fetch user profile'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Failed to fetch user profile')
+      )
     }
   }
 }

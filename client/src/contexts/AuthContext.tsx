@@ -48,16 +48,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || 'Login failed');
+        throw new Error(result.error?.message || 'Login failed');
       }
 
-      // Store token and user data
-      localStorage.setItem('access_token', data.data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.data.user));
-      setUser(data.data.user);
+      // New structure: { data: { user, accessToken } }
+      const { user, accessToken } = result.data;
+      
+      localStorage.setItem('access_token', accessToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -74,16 +76,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password, name }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || 'Signup failed');
+        throw new Error(result.error?.message || 'Signup failed');
       }
 
-      // Store token and user data
-      localStorage.setItem('access_token', data.data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.data.user));
-      setUser(data.data.user);
+      // New structure: { data: { user, accessToken } }
+      const { user, accessToken } = result.data;
+      
+      localStorage.setItem('access_token', accessToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
     } catch (error) {
       console.error('Signup error:', error);
       throw error;

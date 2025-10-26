@@ -14,7 +14,7 @@ class ExpenseAPI {
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     try {
       const token = this.getAuthToken();
       const headers: Record<string, string> = {
@@ -36,13 +36,13 @@ class ExpenseAPI {
         headers,
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || 'API request failed');
+        throw new Error(result.error?.message || 'API request failed');
       }
 
-      return data;
+      return result;
     } catch (error) {
       console.error('API Error:', error);
       throw error;
@@ -60,42 +60,33 @@ class ExpenseAPI {
     params.append('page', page.toString());
     params.append('limit', limit.toString());
 
-    const response = await this.request<{ expenses: Expense[], total: number }>(`/api/expenses?${params}`);
-    
-    const data = response.data!;
-    const expenses = data.expenses || [];
-    const total = data.total || 0;
+    const response = await this.request<{ data: Expense[], meta: { pagination: any } }>(`/api/expenses?${params}`);
     
     return {
-      data: expenses,
-      pagination: {
-        page: page,
-        limit: limit,
-        total: total,
-        totalPages: Math.ceil(total / limit)
-      }
+      data: response.data,
+      pagination: response.meta.pagination
     };
   }
 
   async getExpense(id: string): Promise<Expense> {
-    const response = await this.request<Expense>(`/api/expenses/${id}`);
-    return response.data!;
+    const response = await this.request<{ data: Expense }>(`/api/expenses/${id}`);
+    return response.data;
   }
 
   async createExpense(expense: ExpenseFormData): Promise<Expense> {
-    const response = await this.request<Expense>('/api/expenses', {
+    const response = await this.request<{ data: Expense }>('/api/expenses', {
       method: 'POST',
       body: JSON.stringify(expense),
     });
-    return response.data!;
+    return response.data;
   }
 
   async updateExpense(id: string, expense: Partial<ExpenseFormData>): Promise<Expense> {
-    const response = await this.request<Expense>(`/api/expenses/${id}`, {
+    const response = await this.request<{ data: Expense }>(`/api/expenses/${id}`, {
       method: 'PUT',
       body: JSON.stringify(expense),
     });
-    return response.data!;
+    return response.data;
   }
 
   async deleteExpense(id: string): Promise<void> {
@@ -111,9 +102,9 @@ class ExpenseAPI {
     if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom);
     if (filters?.dateTo) params.append('dateTo', filters.dateTo);
 
-    const response = await this.request<ExpenseSummary>(`/api/expenses/summary?${params}`);
+    const response = await this.request<{ data: ExpenseSummary }>(`/api/expenses/summary?${params}`);
     
-    return response.data!;
+    return response.data;
   }
 }
 

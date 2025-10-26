@@ -1,3 +1,5 @@
+import { ApiResponse, ErrorCodes } from '../helpers/ApiResponse.js'
+
 /**
  * HTTP Controller for Expense operations
  */
@@ -50,21 +52,19 @@ export class ExpenseController {
   async createExpense(req, res) {
     try {
       const result = await this.createExpenseUseCase.execute(req.body, req.user.id)
-      res.status(201).json(result)
+      res.status(201).json(ApiResponse.success(result))
     } catch (error) {
       console.error('Create expense error:', error)
       
       if (error.message.includes('Validation failed')) {
-        return res.status(400).json({
-          error: 'Bad Request',
-          message: error.message
-        })
+        return res.status(400).json(
+          ApiResponse.error(ErrorCodes.VALIDATION_ERROR, error.message)
+        )
       }
 
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Failed to create expense'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Failed to create expense')
+      )
     }
   }
 
@@ -147,13 +147,12 @@ export class ExpenseController {
   async getExpenses(req, res) {
     try {
       const result = await this.getExpensesUseCase.execute(req.user.id, req.query)
-      res.json(result)
+      res.json(ApiResponse.success(result.expenses, { pagination: result.pagination }))
     } catch (error) {
       console.error('Get expenses error:', error)
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Failed to fetch expenses'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Failed to fetch expenses')
+      )
     }
   }
 
@@ -165,21 +164,19 @@ export class ExpenseController {
     try {
       const { id } = req.params
       const result = await this.getExpenseByIdUseCase.execute(id, req.user.id)
-      res.json(result)
+      res.json(ApiResponse.success(result))
     } catch (error) {
       console.error('Get expense by ID error:', error)
       
       if (error.message.includes('not found') || error.message.includes('Access denied')) {
-        return res.status(404).json({
-          error: 'Not Found',
-          message: 'Expense not found'
-        })
+        return res.status(404).json(
+          ApiResponse.error(ErrorCodes.NOT_FOUND, 'Expense not found')
+        )
       }
 
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Failed to fetch expense'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Failed to fetch expense')
+      )
     }
   }
 
@@ -191,28 +188,25 @@ export class ExpenseController {
     try {
       const { id } = req.params
       const result = await this.updateExpenseUseCase.execute(id, req.body, req.user.id)
-      res.json(result)
+      res.json(ApiResponse.success(result))
     } catch (error) {
       console.error('Update expense error:', error)
       
       if (error.message.includes('not found') || error.message.includes('Access denied')) {
-        return res.status(404).json({
-          error: 'Not Found',
-          message: 'Expense not found'
-        })
+        return res.status(404).json(
+          ApiResponse.error(ErrorCodes.NOT_FOUND, 'Expense not found')
+        )
       }
 
       if (error.message.includes('Validation failed')) {
-        return res.status(400).json({
-          error: 'Bad Request',
-          message: error.message
-        })
+        return res.status(400).json(
+          ApiResponse.error(ErrorCodes.VALIDATION_ERROR, error.message)
+        )
       }
 
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Failed to update expense'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Failed to update expense')
+      )
     }
   }
 
@@ -223,22 +217,20 @@ export class ExpenseController {
   async deleteExpense(req, res) {
     try {
       const { id } = req.params
-      const result = await this.deleteExpenseUseCase.execute(id, req.user.id)
-      res.json(result)
+      await this.deleteExpenseUseCase.execute(id, req.user.id)
+      res.status(204).send()
     } catch (error) {
       console.error('Delete expense error:', error)
       
       if (error.message.includes('not found') || error.message.includes('Access denied')) {
-        return res.status(404).json({
-          error: 'Not Found',
-          message: 'Expense not found'
-        })
+        return res.status(404).json(
+          ApiResponse.error(ErrorCodes.NOT_FOUND, 'Expense not found')
+        )
       }
 
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Failed to delete expense'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Failed to delete expense')
+      )
     }
   }
 
@@ -249,13 +241,12 @@ export class ExpenseController {
   async getExpenseSummary(req, res) {
     try {
       const result = await this.getExpenseSummaryUseCase.execute(req.user.id, req.query)
-      res.json(result)
+      res.json(ApiResponse.success(result))
     } catch (error) {
       console.error('Get expense summary error:', error)
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'Failed to fetch expense summary'
-      })
+      res.status(500).json(
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Failed to fetch expense summary')
+      )
     }
   }
 }

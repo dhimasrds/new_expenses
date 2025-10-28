@@ -62,14 +62,15 @@ export class AuthController {
         )
       }
 
-      if (error.message.includes('already exists')) {
+      if (error.message.includes('already exists') || error.message.includes('already registered')) {
         return res.status(409).json(
           ApiResponse.error(ErrorCodes.ALREADY_EXISTS, 'User already exists with this email')
         )
       }
 
+      // Return detailed error message for debugging
       res.status(500).json(
-        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, 'Signup failed')
+        ApiResponse.error(ErrorCodes.INTERNAL_ERROR, error.message || 'Signup failed')
       )
     }
   }

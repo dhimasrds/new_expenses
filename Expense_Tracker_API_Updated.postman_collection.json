@@ -1,0 +1,363 @@
+{
+	"info": {
+		"_postman_id": "expense-tracker-v2",
+		"name": "Expense Tracker API - Updated",
+		"description": "Complete API collection for Expense Tracker with standardized response structure\n\n**Response Structure:**\n- Success: `{ \"data\": {...}, \"meta\"?: {...} }`\n- Error: `{ \"error\": { \"code\": \"ERROR_CODE\", \"message\": \"Error message\", \"details\"?: {...} } }`\n\n**Authentication:**\nAll protected endpoints require Bearer token in Authorization header.\n\n**Auto-save Features:**\n- Access token auto-saved after login\n- Expense ID auto-saved after creation\n- User ID extracted from response",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Signup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.user) {",
+									"        pm.collectionVariables.set('userId', response.data.user.id);",
+									"        console.log('User created:', response.data.user.email);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"test1234\",\n  \"fullName\": \"Test User\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Register a new user account.\n\n**Request Body:**\n- `email` (string, required): Valid email address\n- `password` (string, required): Minimum 6 characters\n- `fullName` (string, required): User's full name\n\n**Response (200):**\n```json\n{\n  \"data\": {\n    \"user\": {\n      \"id\": \"uuid\",\n      \"email\": \"user@example.com\"\n    }\n  }\n}\n```\n\n**Error Codes:**\n- `VALIDATION_ERROR`: Invalid input\n- `USER_ALREADY_EXISTS`: Email already registered\n- `INTERNAL_ERROR`: Server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    // Save access token",
+									"    if (response.data && response.data.accessToken) {",
+									"        pm.collectionVariables.set('accessToken', response.data.accessToken);",
+									"        console.log('Access token saved');",
+									"    }",
+									"    ",
+									"    // Save user ID",
+									"    if (response.data && response.data.user) {",
+									"        pm.collectionVariables.set('userId', response.data.user.id);",
+									"        console.log('User ID:', response.data.user.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"lele@gmail.com\",\n  \"password\": \"test1234\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate user and get access token.\n\n**Request Body:**\n- `email` (string, required)\n- `password` (string, required)\n\n**Response (200):**\n```json\n{\n  \"data\": {\n    \"user\": {\n      \"id\": \"uuid\",\n      \"email\": \"user@example.com\"\n    },\n    \"accessToken\": \"eyJhbGci...\"\n  }\n}\n```\n\n**Auto-saved Variables:**\n- `accessToken`: Used for subsequent authenticated requests\n- `userId`: Current user ID\n\n**Error Codes:**\n- `VALIDATION_ERROR`: Missing or invalid fields\n- `INVALID_CREDENTIALS`: Wrong email or password"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout user and invalidate session.\n\n**Response (200):**\n```json\n{\n  \"data\": {\n    \"message\": \"Logout successful\"\n  }\n}\n```\n\n**Requires:** Bearer token"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for user registration, login, and logout.\n\n**Note:** Login automatically saves the access token for use in protected endpoints."
+		},
+		{
+			"name": "Expenses",
+			"item": [
+				{
+					"name": "Get All Expenses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/expenses?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"expenses"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (default: 10, max: 100)"
+								},
+								{
+									"key": "category",
+									"value": "Work",
+									"description": "Filter by category",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "2025-10-01T00:00:00.000Z",
+									"description": "Filter from date (ISO 8601)",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "2025-10-31T23:59:59.999Z",
+									"description": "Filter to date (ISO 8601)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get paginated list of expenses for authenticated user.\n\n**Query Parameters:**\n- `page` (integer, optional): Page number, default 1\n- `limit` (integer, optional): Items per page, default 10, max 100\n- `category` (string, optional): Filter by category\n- `startDate` (datetime, optional): Filter from date\n- `endDate` (datetime, optional): Filter to date\n\n**Response (200):**\n```json\n{\n  \"data\": [\n    {\n      \"id\": \"uuid\",\n      \"user_id\": \"uuid\",\n      \"description\": \"Lunch\",\n      \"amount\": 15.50,\n      \"category\": \"Food\",\n      \"date\": \"2025-10-28T12:00:00.000Z\",\n      \"created_at\": \"2025-10-28T12:05:00.000Z\",\n      \"updated_at\": \"2025-10-28T12:05:00.000Z\"\n    }\n  ],\n  \"meta\": {\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 10,\n      \"total\": 50,\n      \"totalPages\": 5\n    }\n  }\n}\n```\n\n**Categories:** Food, Transport, Work, Entertainment, Health, Shopping, Bills, Other"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Expense",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.id) {",
+									"        pm.collectionVariables.set('expenseId', response.data.id);",
+									"        console.log('Expense created with ID:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Team lunch meeting\",\n  \"amount\": 45.75,\n  \"category\": \"Food\",\n  \"date\": \"2025-10-28T12:00:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/expenses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"expenses"
+							]
+						},
+						"description": "Create a new expense.\n\n**Request Body:**\n- `description` (string, required): 1-255 characters\n- `amount` (number, required): Must be > 0.01\n- `category` (string, required): One of valid categories\n- `date` (datetime, required): ISO 8601 format\n\n**Valid Categories:**\nFood, Transport, Work, Entertainment, Health, Shopping, Bills, Other\n\n**Response (201):**\n```json\n{\n  \"data\": {\n    \"id\": \"uuid\",\n    \"user_id\": \"uuid\",\n    \"description\": \"Team lunch\",\n    \"amount\": 45.75,\n    \"category\": \"Food\",\n    \"date\": \"2025-10-28T12:00:00.000Z\",\n    \"created_at\": \"2025-10-28T12:05:00.000Z\",\n    \"updated_at\": \"2025-10-28T12:05:00.000Z\"\n  }\n}\n```\n\n**Auto-saved Variable:**\n- `expenseId`: Used in update/delete requests"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Expense by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/expenses/{{expenseId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"expenses",
+								"{{expenseId}}"
+							]
+						},
+						"description": "Get single expense by ID.\n\n**Path Parameter:**\n- `id` (uuid, required): Expense ID\n\n**Response (200):**\n```json\n{\n  \"data\": {\n    \"id\": \"uuid\",\n    \"user_id\": \"uuid\",\n    \"description\": \"Lunch\",\n    \"amount\": 15.50,\n    \"category\": \"Food\",\n    \"date\": \"2025-10-28T12:00:00.000Z\",\n    \"created_at\": \"2025-10-28T12:05:00.000Z\",\n    \"updated_at\": \"2025-10-28T12:05:00.000Z\"\n  }\n}\n```\n\n**Error Codes:**\n- `NOT_FOUND`: Expense doesn't exist\n- `FORBIDDEN`: Not the owner"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Expense",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Updated team lunch\",\n  \"amount\": 50.00,\n  \"category\": \"Food\",\n  \"date\": \"2025-10-28T12:00:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/expenses/{{expenseId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"expenses",
+								"{{expenseId}}"
+							]
+						},
+						"description": "Update an existing expense. Only the owner can update.\n\n**Path Parameter:**\n- `id` (uuid, required): Expense ID\n\n**Request Body (all optional):**\n- `description` (string): 1-255 characters\n- `amount` (number): Must be > 0.01\n- `category` (string): Valid category\n- `date` (datetime): ISO 8601 format\n\n**Response (200):**\n```json\n{\n  \"data\": {\n    \"id\": \"uuid\",\n    \"user_id\": \"uuid\",\n    \"description\": \"Updated lunch\",\n    \"amount\": 50.00,\n    \"category\": \"Food\",\n    \"date\": \"2025-10-28T12:00:00.000Z\",\n    \"created_at\": \"2025-10-28T12:05:00.000Z\",\n    \"updated_at\": \"2025-10-28T13:00:00.000Z\"\n  }\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Expense",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/expenses/{{expenseId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"expenses",
+								"{{expenseId}}"
+							]
+						},
+						"description": "Delete an expense. Only the owner can delete.\n\n**Path Parameter:**\n- `id` (uuid, required): Expense ID\n\n**Response (200):**\n```json\n{\n  \"data\": {\n    \"message\": \"Expense deleted successfully\",\n    \"id\": \"uuid\"\n  }\n}\n```\n\n**Error Codes:**\n- `NOT_FOUND`: Expense doesn't exist\n- `FORBIDDEN`: Not the owner"
+					},
+					"response": []
+				}
+			],
+			"description": "CRUD operations for expenses.\n\n**Authentication Required:** All endpoints require Bearer token.\n\n**Auto-save:** Creating an expense saves the ID in `{{expenseId}}` variable."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://newexpenses.vercel.app",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "expenseId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
